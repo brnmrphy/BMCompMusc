@@ -32,6 +32,7 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 ```{r sadness, echo=TRUE}
 library(spotifyr)
 sadness <- get_artist_audio_features("eliott smith")
+library(dplyr)
 library(ggplot2) 
 ggplot(sadness, aes(x=album_name, y=valence)) + geom_col() + theme_gray() + ggtitle("valence of Elliott Smith's albums")
 ```
