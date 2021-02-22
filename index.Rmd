@@ -1,22 +1,91 @@
 ---
-title: "Portfolio BMCompMusc"
+title: "Computational Musicology Portfolio"
 author: "Brian Murphy"
-date: "2/16/2021"
-output: html_document
+date: "02/2021"
+output: 
+    flexdashboard::flex_dashboard:
+        storyboard: true
+        theme: journal
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Elliott Smith's Valence
-Elliott Smith is generally known as a pretty sad dude, so I wanted to see which albums have the biggest valence ratings. It doesn't explain much yet but I had a lot of difficulties with the making of the plot and coding. 
-
-```{r sadness, echo=TRUE}
+```{r setup}
+library(tidyverse)
+library(plotly) # N.B. Requires the Cairo package
 library(spotifyr)
-sadness <- get_artist_audio_features("eliott smith")
-library(dplyr)
-library(ggplot2) 
-ggplot(sadness, aes(x=album_name, y=valence)) + geom_col() + theme_gray() + ggtitle("valence of Elliott Smith's albums")
+library(compmus)
 ```
 
+### The Happiest of the Decades 
+
+Throughout the decades we have seen happier and sadder times. Each decade has been marked by the tough times and the good times, as are we. Music has long been a means of expression for human beings, in both listening as playing. So maybe music can tell us more about the emotions of a decade's zeitgeist, which brings me to my question; which decade was the happiest, and what can the popular music released in that decade tell us about the collective happiness?
+
+### Emotional Stats
+
+```{r happy}
+AO_60s <- get_playlist_audio_features("", "37i9dQZF1DXaKIA8E7WcJj")
+AO_70s <- get_playlist_audio_features("", "37i9dQZF1DWTJ7xPn4vNaz")
+AO_80s <- get_playlist_audio_features("", "37i9dQZF1DX4UtSsGT1Sbe")
+AO_90s <- get_playlist_audio_features("", "37i9dQZF1DXbTxeAdrVG2l")
+AO_00s <- get_playlist_audio_features("", "37i9dQZF1DX4o1oenSJRJd")
+AO_10s <- get_playlist_audio_features("", "37i9dQZF1DX5Ejj0EkURtP")
+AO_decades <-
+  AO_60s %>%
+  mutate(country = "The 60s") %>%
+  bind_rows(AO_70s %>% mutate(country = "The 70s")) %>%
+  bind_rows(AO_80s %>% mutate(country = "The 80s")) %>% 
+  bind_rows(AO_90s %>% mutate(country = "The 90s")) %>%
+  bind_rows(AO_00s %>% mutate(country = "The 00s")) %>%
+  bind_rows(AO_10s %>% mutate(country = "The 10s")) %>%
+  mutate(
+    country = fct_relevel(country, "The 10s", "The 00s", "The 90s", "The 80s", "The 70s", "The 60s")
+  )
+  
+  happy_stats <-
+  AO_decades %>%
+  ggplot(                          # Set up the plot.
+    aes(
+      x = valence,
+      y = danceability,
+      size = track.popularity,
+      colour = mode,
+      label = track.name           # Labels will be interactively visible.
+    )
+  ) +
+  geom_point() +                   # Scatter plot.
+  geom_rug(size = 0.1) +           # Add 'fringes' to show data distribution.
+  facet_wrap(~country) +           # Separate charts per country.
+  scale_x_continuous(              # Fine-tune the x axis.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),        # Use grid-lines for quadrants only.
+    minor_breaks = NULL            # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(              # Fine-tune the y axis in the same way.
+    limits = c(0.1, 1),
+    breaks = c(0, 0.50, 1),
+    minor_breaks = NULL
+  ) +
+  scale_colour_viridis_c(          # Use the cividis palette
+    option = "E",                  # Qualitative set.
+    alpha = 0.8,                   # Include some transparency
+    guide = "none"
+  ) +
+  scale_size_continuous(           # Fine-tune the sizes of each point.
+    guide = "none"                # Remove the legend for size.
+  ) +
+  theme_classic() +                  # Use a simpler theme.
+  labs(                            # Make the titles nice.
+    x = "Valence",
+    y = "Danceability"
+  )
+ggplotly(happy_stats)
+```
+
+***
+
+These graphs (i am not yet so happy with, they look a bit cluttered...) show the valence (x axis) and the danceability (y axis) of Spotify's own "All Out" playlists of each decade from the 60s up till the 10s. The size of the dots indicates the track popularity and the colour indicates the mode (major/minor) of the song, 1 for major, 0 for minor.]
+
+### Conclusions I do not have yet
+
+- in modern music more minor
+- 00s more danceable?
+- 
