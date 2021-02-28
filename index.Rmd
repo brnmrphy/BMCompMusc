@@ -15,6 +15,52 @@ library(spotifyr)
 library(compmus)
 ```
 
+### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **chromogram** can tell us more
+
+```{r}
+SOY <-
+  get_tidy_audio_analysis("7qiZfU4dY1lWllzX7mPBI3") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+```
+
+```{r}
+SOY %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+```
+
+***
+
+For some reason I haven't managed to get all the cepstrograms next to eachother... Does someone have any tips/code I can use? 
+
+
 ### The Happiest of the Decades 
 
 Throughout the decades we have seen happier and sadder times. Each decade has been marked by the tough times and the good times, as are we. Music has long been a means of expression for human beings, in both listening as playing. So maybe music can tell us more about the emotions of a decade's zeitgeist, which brings me to my question; which decade was the happiest, and what can the popular music released in that decade tell us about the collective happiness?
@@ -87,50 +133,6 @@ ggplotly(happy_stats)
 
 These graphs show the valence (x axis) and the [popularity (y axis) of Spotify's own "All Out" playlists of each decade from the 60s up till the 10s. The size of the dots indicates the danceability and the colour indicates the mode (major/minor) of the song, 1 for major, 0 for minor.
 
-### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **chromogram** can tell us more
-
-```{r}
-SOY <-
-  get_tidy_audio_analysis("7qiZfU4dY1lWllzX7mPBI3") %>% # Change URI.
-  compmus_align(bars, segments) %>%                     # Change `bars`
-  select(bars) %>%                                      #   in all three
-  unnest(bars) %>%                                      #   of these lines.
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  ) %>%
-  mutate(
-    timbre =
-      map(segments,
-        compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
-      )
-  )
-```
-
-```{r}
-SOY %>%
-  compmus_gather_timbre() %>%
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = basis,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
-  scale_fill_viridis_c() +                              
-  theme_classic()
-```
-
-***
-
-For some reason I haven't managed to get all the cepstrograms next to eachother... Does someone have any tips/code I can use? 
 
 ### Conclusions I do not have yet
 
