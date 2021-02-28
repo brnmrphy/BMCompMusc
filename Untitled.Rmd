@@ -1,0 +1,56 @@
+---
+title: "try out"
+author: "Brian Murphy"
+date: "2/24/2021"
+output: html_document
+---
+
+
+```{r setup}
+library(tidyverse)
+library(plotly) # N.B. Requires the Cairo package
+library(spotifyr)
+library(compmus)
+```
+
+
+
+```{r}
+ bzt <-
+     get_tidy_audio_analysis("5ZLkc5RY1NM4FtGWEd6HOE") %>% # Change URI.
+     compmus_align(beats, segments) %>%                     # Change `bars`
+     select(beats) %>%                                      #   in all three
+     unnest(beats) %>%                                      #   of these lines.
+     mutate(
+         pitches =
+             map(segments,
+                 compmus_summarise, pitches,
+                 method = "rms", norm = "euclidean"              # Change summary & norm.
+             )
+     ) %>%
+     mutate(
+         timbre =
+             map(segments,
+                 compmus_summarise, timbre,
+                 method = "rms", norm = "euclidean"              # Change summary & norm.
+             )
+     )
+```
+
+```{r}
+bzt %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+```
+
