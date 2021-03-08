@@ -276,7 +276,7 @@ soy %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "Shape Of You")
 
 plotB <-
 sb %>% 
@@ -291,7 +291,7 @@ sb %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "SexyBack")
 
 plotC <-
 llvl %>% 
@@ -306,7 +306,7 @@ llvl %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "Livin la Vida Loca")
 
 plotD <-
 wos %>% 
@@ -321,7 +321,7 @@ wos %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "Walking On Sunshine")
 
 plotE <-
 raran %>% 
@@ -336,7 +336,7 @@ raran %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "Rock And Roll All Nite")
 
 plotF <-
 opw %>% 
@@ -351,10 +351,14 @@ opw %>%
   geom_tile() +
   scale_fill_viridis_c(guide = "none") +
   theme_minimal() +
-  labs(x = "Time (s)", y = "")
+  labs(x = "Time (s)", y = "", title = "Oh, Pretty Woman")
 
 grid.arrange(plotA,plotB,plotC,plotD,plotE,plotF, nrow=2)
 ```
+
+***
+
+I seems as if the distinctness between notes in music has gotten bigger through the years? I have the same cluttered problem here as a do with the ceptrograms...
 
 
 ### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **cepstrogram** can tell us more
@@ -587,7 +591,7 @@ grid.arrange(plot1,plot2,plot3,plot4,plot5,plot6, nrow=2, ncol=3)
 
 ***
 
-For some reason I haven't managed to get all the cepstrograms next to eachother... Does someone have any tips/code I can use? 
+Okay so I managed to get the grams next to each other, but they're very cluttered... Does someone have a solution for this? I've tried random stuff with nrow and ncol but it didn't help. 
 
 Introduction {.storyboard}
 =========================================
