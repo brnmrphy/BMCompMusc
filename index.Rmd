@@ -13,9 +13,351 @@ library(tidyverse)
 library(plotly) # N.B. Requires the Cairo package
 library(spotifyr)
 library(compmus)
+library(dplyr)
+library(gridExtra)
+library(ggplot2)
 ```
 
-### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **chromogram** can tell us more
+Grams {.storyboard}
+=========================================
+
+### Can we find something by looking at the most populair **keys** of the last 60 years?
+
+```{r}
+AO_60s <- get_playlist_audio_features("", "37i9dQZF1DXaKIA8E7WcJj")
+AO_70s <- get_playlist_audio_features("", "37i9dQZF1DWTJ7xPn4vNaz")
+AO_80s <- get_playlist_audio_features("", "37i9dQZF1DX4UtSsGT1Sbe")
+AO_90s <- get_playlist_audio_features("", "37i9dQZF1DXbTxeAdrVG2l")
+AO_00s <- get_playlist_audio_features("", "37i9dQZF1DX4o1oenSJRJd")
+AO_10s <- get_playlist_audio_features("", "37i9dQZF1DX5Ejj0EkURtP")
+AO_decades <-
+  AO_60s %>% top_n(20, track.popularity) %>%
+  mutate(country = "The 60s") %>%
+  bind_rows(AO_70s %>% top_n(20, track.popularity) %>% mutate(country = "The 70s")) %>%
+  bind_rows(AO_80s %>% top_n(20, track.popularity) %>% mutate(country = "The 80s")) %>% 
+  bind_rows(AO_90s %>% top_n(20, track.popularity) %>% mutate(country = "The 90s")) %>%
+  bind_rows(AO_00s %>% top_n(20, track.popularity) %>% mutate(country = "The 00s")) %>%
+  bind_rows(AO_10s %>% top_n(20, track.popularity) %>% mutate(country = "The 10s")) %>%
+  mutate(
+    country = fct_relevel(country, "The 10s", "The 00s", "The 90s", "The 80s", "The 70s", "The 60s")
+  )
+
+```
+
+
+```{r}
+sixties_hist<- 
+hist(AO_60s$key, main = "Popular keys in the 60s",
+     xlab = "key",
+     border="black",
+     col="darkblue", 
+     freq = FALSE)
+
+seventies_hist<-
+  hist(AO_70s$key, main = "Popular keys in the 70s",  xlab = "Energy Level",
+       border="black", 
+     col="darkblue", 
+     freq = FALSE)
+
+eighties_hist<-
+   hist(AO_80s$key, main = "Popular keys in the 80s",  
+     xlab = "Energy Level",
+       border="black", 
+     col="darkblue", 
+     freq = FALSE)
+     
+nineties_hist<-
+ hist(AO_90s$key, main = "Popular keys in the 90s",  xlab = "Energy Level",
+      border="black", 
+     col="darkblue", 
+     freq = FALSE)
+
+zeroes_hist<- 
+   hist(AO_00s$key, main = "Popular keys in the 00s",  xlab = "Energy Level",
+        border="black", 
+     col="darkblue", 
+     freq = FALSE)
+
+tens_hist<-
+   hist(AO_10s$key, main = "Popular keys in the 10s", xlab = "Energy Level",
+        border="black", 
+     col="darkblue", 
+     freq = FALSE,)
+```
+
+***
+
+The keys are set in pitch classes, so 0=C, 1=C#/Db, 2=D etc
+
+As you can see, the most popular key in all decades is C. The least popular key overall seems to be D. Something I don't understand is that the key only seems to go up till A#. I can't find the B...
+
+### ### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **chordogram** can tell us more
+
+```{r}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+```
+
+```{r}
+soy <-
+  get_tidy_audio_analysis("7qiZfU4dY1lWllzX7mPBI3") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+sb <-
+  get_tidy_audio_analysis("0O45fw2L5vsWpdsOdXwNAR") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+llvl <-
+  get_tidy_audio_analysis("0Ph6L4l8dYUuXFmb71Ajnd") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+wos <-
+  get_tidy_audio_analysis("05wIrZSwuaVWhcv5FfqeH0") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+raran <-
+  get_tidy_audio_analysis("6KTv0Z8BmVqM7DPxbGzpVC") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+opw <-
+  get_tidy_audio_analysis("48i055G1OT5KxGGftwFxWy") %>%
+  compmus_align(sections, segments) %>%
+  select(sections) %>%
+  unnest(sections) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+```
+
+```{r}
+plotA <-
+soy %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plotB <-
+sb %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plotC <-
+llvl %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plotD <-
+wos %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plotE <-
+raran %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plotF <-
+opw %>% 
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) %>%
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+grid.arrange(plotA,plotB,plotC,plotD,plotE,plotF, nrow=2)
+```
+
+
+### Having a deeper look at the most **positive** tunes of each decade (playlist) and see if a **cepstrogram** can tell us more
 
 ```{r}
 SOY <-
@@ -37,9 +379,113 @@ SOY <-
         method = "rms", norm = "euclidean"              # Change summary & norm.
       )
   )
+
+SB <-
+  get_tidy_audio_analysis("0O45fw2L5vsWpdsOdXwNAR") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+LlVL <-
+  get_tidy_audio_analysis("0Ph6L4l8dYUuXFmb71Ajnd") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+WOS <-
+  get_tidy_audio_analysis("05wIrZSwuaVWhcv5FfqeH0") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+RARAN <-
+  get_tidy_audio_analysis("6KTv0Z8BmVqM7DPxbGzpVC") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+OPW <-
+  get_tidy_audio_analysis("48i055G1OT5KxGGftwFxWy") %>% # Change URI.
+  compmus_align(bars, segments) %>%                     # Change `bars`
+  select(bars) %>%                                      #   in all three
+  unnest(bars) %>%                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+
 ```
 
 ```{r}
+
+plot1 <-
 SOY %>%
   compmus_gather_timbre() %>%
   ggplot(
@@ -51,19 +497,107 @@ SOY %>%
     )
   ) +
   geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  labs(x = "Time (s)", y = NULL, title = "Shape Of You", fill = "Magnitude") +
   scale_fill_viridis_c() +                              
   theme_classic()
+
+plot2<- 
+SB %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "SexyBack", fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+plot3<- 
+LlVL %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "Livin' la Vida Loca", fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+plot4<- 
+WOS %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "Walking On Sunshine", fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+plot5<- 
+RARAN %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "Rock And Roll All Nite", fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+plot6<- 
+OPW %>%
+  compmus_gather_timbre() %>%
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, title = "Oh, Pretty Woman", fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+grid.arrange(plot1,plot2,plot3,plot4,plot5,plot6, nrow=2, ncol=3)
+
 ```
 
 ***
 
 For some reason I haven't managed to get all the cepstrograms next to eachother... Does someone have any tips/code I can use? 
 
+Introduction {.storyboard}
+=========================================
 
 ### The Happiest of the Decades 
 
 Throughout the decades we have seen happier and sadder times. Each decade has been marked by the tough times and the good times, as are we. Music has long been a means of expression for human beings, in both listening as playing. So maybe music can tell us more about the emotions of a decade's zeitgeist, which brings me to my question; which decade was the happiest, and what can the popular music released in that decade tell us about the collective happiness?
+
+Overview {.storyboard}
+=========================================
 
 ### Emotional Stats
 
