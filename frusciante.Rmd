@@ -1,0 +1,35 @@
+---
+title: "JFroosh"
+author: "Brian Murphy"
+date: "3/10/2021"
+output: 
+    flexdashboard::flex_dashboard:
+        storyboard: true
+        theme: journal
+---
+
+```{r setup}
+library(tidyverse)
+library(plotly) # N.B. Requires the Cairo package
+library(spotifyr)
+library(compmus)
+library(dplyr)
+library(gridExtra)
+library(ggplot2)
+```
+
+```{r}
+get_my_top_artists_or_tracks(type = 'tracks', time_range = 'short_term', limit = 5) %>% 
+    mutate(artist.name = map_chr(artists, function(x) x$name[1])) %>% 
+    select(name, artist.name, album.name) %>% 
+    kable()
+```
+
+
+```{r}
+NLAUJATS <- get_album_tracks("4wTLTb4VpQtTxmeyyFOFVj")
+
+NLAUJATS %>% ggplot(aes(x = energy)) + geom_histogram(binwidth = 0.1)
+```
+
+`
