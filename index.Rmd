@@ -60,6 +60,7 @@ get_pr <- function(fit) {
 Homework of this week {.storyboard}
 =========================================
 
+
 ### **Classifiers**: using a **k-Nearest Neighbour**, **Decision Tree** and **Random Forest** classifier to predict which **song** belongs to the **album** it's from. 
 
 ```{r echo=FALSE}
