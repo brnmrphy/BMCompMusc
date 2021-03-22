@@ -6,6 +6,11 @@ output:
     flexdashboard::flex_dashboard:
         storyboard: true
         theme: journal
+            css: styles.css
+    orientation: rows
+    toc: true
+    toc_depth: 2
+    toc_float: tru
 ---
 
 ```{r setup}
@@ -59,7 +64,7 @@ Homework of this week {.storyboard}
 
 ### Classifier
 
-```{r}
+```{r echo=FALSE}
 niandrawaters_features <-
   Both_Albums %>%  # For your portfolio, change this to the name of your corpus.
   add_audio_analysis() %>% 

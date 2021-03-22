@@ -1,12 +1,14 @@
 ---
-title: "JFroosh"
+title: "The Spotify Rehab"
 author: "Brian Murphy"
 date: "2021"
 output: 
     flexdashboard::flex_dashboard:
         storyboard: true
         theme: journal
+        css: styles.css
 ---
+
 
 ```{r setup}
 library(tidyverse)
@@ -19,6 +21,7 @@ library(ggplot2)
 library(tidymodels)
 library(ggdendro)
 library(heatmaply)
+library(flexdashboard)
 ```
 
 ```{r}
@@ -57,9 +60,9 @@ get_pr <- function(fit) {
 Homework of this week {.storyboard}
 =========================================
 
-### Classifier
+### **Classifiers**: using a **k-Nearest Neighbour**, **Decision Tree** and **Random Forest** classifier to predict which **song** belongs to the **album** it's from. 
 
-```{r}
+```{r echo=FALSE}
 niandrawaters_features <-
   Both_Albums %>%  # For your portfolio, change this to the name of your corpus.
   add_audio_analysis() %>% 
@@ -108,7 +111,9 @@ froosh_recipe <-
   # step_range(all_predictors())    # Sets range to [0, 1].
 
 froosh_cv <- niandrawaters_features %>% vfold_cv(5)
+```
 
+```{r class, include=TRUE, echo=FALSE, message=FALSE}
 knn_model <-
   nearest_neighbor(neighbors = 1) %>%
   set_mode("classification") %>% 
@@ -121,15 +126,24 @@ froosh_knn <-
     froosh_cv, 
     control = control_resamples(save_pred = TRUE)
   )
-
-froosh_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
 ```
 
-***
+```{r trees, include=TRUE, echo=FALSE, message=FALSE} 
+tree_model <-
+  decision_tree() %>%
+  set_mode("classification") %>% 
+  set_engine("C5.0")
+froosh_tree <- 
+  workflow() %>% 
+  add_recipe(froosh_recipe) %>% 
+  add_model(tree_model) %>% 
+  fit_resamples(
+    froosh_cv, 
+    control = control_resamples(save_pred = TRUE)
+  )
+```
 
-This heat map shows the performance of a classifier, attempting to distinguish the two albums by Frusciante I'm comparing. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
-
-```{r include=FALSE}
+```{r forest, include=FALSE, echo=FALSE, message=FALSE} 
 forest_model <-
   rand_forest() %>%
   set_mode("classification") %>% 
@@ -142,7 +156,51 @@ froosh_forest <-
     froosh_cv, 
     control = control_resamples(save_pred = TRUE)
   )
+```
 
+Here we have three classifying methodes; kNN, decision tree and random forest, attempting to distinguish the two albums by Frusciante I'm comparing. The most importent features are: 
+
+- Timbre component 1
+- Timbre component 2
+- Timbre component 12
+- loudness
+- energy
+
+The predictions sometimes slightly change (usually by one or two) when I rerun the code, so it is possible the subtext differs from the corresponding heatmap. 
+
+#### K-Nearest Neighbours
+
+```{r KNN, echo=FALSE, message=FALSE}
+froosh_knn %>% get_conf_mat() %>% 
+  autoplot(type = "heatmap") 
+```
+***
+
+This heat map shows the performance of a kNN classifier. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted about a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
+
+#### Decision Tree
+
+
+```{r dtree, echo=FALSE, message=FALSE}
+froosh_tree %>% get_conf_mat() %>% 
+  autoplot(type = "heatmap") 
+```
+
+***
+
+This second classifier is done by the decision tree method. The predictions for *Niandra LaDes and Usually Just A T-Shirt* are apparently the same as the kNN classifier, but it performed better than the kNN when it predicted the songs *To Record Only Water For Ten Days*, only getting one song wrong.
+
+#### Random Forest
+
+```{r rforest, echo=FALSE, message=FALSE}
+froosh_forest %>% get_conf_mat() %>%
+  autoplot(type = "heatmap") 
+```
+
+***
+The last classifier I'm using is the random forest classifier. As you can see it perfomed the best out of the three, getting only one prediction wrong for both albums. 
+
+```{r include=FALSE}
 workflow() %>% 
   add_recipe(froosh_recipe) %>% 
   add_model(forest_model) %>% 
@@ -267,9 +325,12 @@ ALL3 <-
 ggplotly(froosh)
 ```
 
-### Histogram
+### Histogram of vitality
 
-```{r}
+
+
+```{r, fig.width=5, fig.height=5}
+Valencebar <-
 ggplot(Both_Albums, aes(x=playlist_name, y=valence)) + 
   geom_bar(stat="identity", width=.5, fill="#FF9933") + 
  labs(title="Ordered Bar Chart", 
@@ -278,6 +339,7 @@ ggplot(Both_Albums, aes(x=playlist_name, y=valence)) +
        y="Valence") + 
   theme(axis.text.x = element_text(angle=0, vjust=0.5))
 
+Energybar <-
 ggplot(Both_Albums, aes(x=playlist_name, y=energy)) + 
   geom_bar(stat="identity", width=.5, fill="#FF3300") + 
   labs(title="Ordered Bar Chart", 
@@ -285,6 +347,8 @@ ggplot(Both_Albums, aes(x=playlist_name, y=energy)) +
        x="Album",
        y="Energy") + 
   theme(axis.text.x = element_text(angle=0, vjust=0.5))
+
+grid.arrange(Valencebar,Energybar, ncol=2)
 ```
 
 ***
