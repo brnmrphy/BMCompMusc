@@ -279,3 +279,43 @@ Both_Albums %>%
   ) +
   theme_update(plot.title = element_text(hjust = 0.5))
 ```
+
+### Comparing the Keys
+
+
+```{r, echo=FALSE}
+keyfroosh <- Both_Albums %>%
+ggplot(aes(x = factor(key_name), fill = mode_name)) +
+  geom_bar() +
+  xlab("Keys") +
+  ylab("Frequency")+
+  ggtitle("Frusciante's Keys") +
+  labs(fill="Major/Minor") +
+  scale_fill_discrete(guide=FALSE) +
+  facet_wrap(~playlist) +
+  theme_minimal() +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
+
+
+ggplotly(keyfroosh)
+```
+
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+key_and_name <-
+Both_Albums %>% select(key_mode, track.name, track.album.name) %>%
+  arrange(key_mode)
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+kable(key_and_name, col.names = c('Key', 'Track', 'Album'))
+
+Both_Albums %>% count(mode)
+
+```
+
+***
+
+Here we have a histogram comparing the keys used in the two albums. It seems Frusciante had a preference for writing songs in A, B, D(major) and G#. B and G# are both close to A, by a whole note and a half note respectively. This could suggest that his vocal range fits best when singing in these keys, or maybe he just has a preference for the sound of them. However there are no songs in G# in *To Record Only Water For Ten Days*. This could be because of the (lack of) tuning in *Niandra Lades and Usually Just A T-Shirt*, resulting in some songs that are intentionally in A being read as G# by spotify. 

@@ -22,6 +22,8 @@ library(tidymodels)
 library(ggdendro)
 library(heatmaply)
 library(flexdashboard)
+library(png)
+library(knitr)
 ```
 
 ```{r}
@@ -225,6 +227,15 @@ Introduction {.storyboard}
 
 John Frusciante is American musician best known as the guitarist of The Red Hot Chili Peppers (RHCP). Besides his work for the RHCP, he has had an accomplished and diverse solo career. In 1992 he left RHCP for the first time and released his debut solo album two years later, in November 1994. The album consists of two parts: *Niandra LaDes* and *Usually Just A T-Shirt*. *Niandra LaDes* was mostly recorded during the writing and recorded of RHCP album *Blood Surgar Sex Magic*, only "Running Away With You" was recorded after quitting the band. *Usually Just A T-Shirt* was recorded while the band was on tour in the months leading up to Frusciante's departure and it appears in the order it was recorded. It was during these months that his use of cocaine and heroin became more extreme. Frusciante said himself in an interview that he can hear his decline into hard drugs in the songs: "It's very sad because I hear, when I listen to it [the last two songs on the record], that it sounds like a person falling apart or it sounds like somebody about to kill themselves". It wasn't until January 1998 that Frusciante was admitted to rehab. He checked out and re-entered society about a month later. The same year Frusciante rejoined RHCP, released a new album with them and went on tour. During the tour he composed new material for his first solo record after rehabilitation, *To Record Only Water For Ten Days*. What I would like to research in this corpus, is what Spotify's API can tell us about the differences in his album before rehabilitation, *Niandra Lades and Usually Just A T-Shirt* (NLDAUJATS), and after rehabilitation, *To Record Only Water For Ten Days* (TROWFTD).
 
+#### The Album Covers
+
+```{r}
+
+knitr::include_graphics("niandraandwater.png")
+
+```
+
+
 Comparing both albums {.storyboard}
 =========================================
 
@@ -412,8 +423,27 @@ ggplot(aes(x = factor(key_name), fill = mode_name)) +
   theme_minimal() +
   scale_fill_manual(values=c("#B59377", "#3076D6"))
 
+
 ggplotly(keyfroosh)
 ```
 
+
+
+```{r, echo=FALSE, message=FALSE, results='hide'}
+key_and_name <-
+Both_Albums %>% select(key_mode, track.name, track.album.name) %>%
+  arrange(key_mode)
+
+```
+
+```{r, echo=FALSE, message=FALSE}
+
+kable(key_and_name, col.names = c('Key', 'Track', 'Album'))
+
+```
+
+***
+
+Here we have a histogram comparing the keys used in the two albums. It seems Frusciante had a preference for writing songs in A, B, D(major) and G#. B and G# are both close to A, by a whole note and a half note respectively. This could suggest that his vocal range fits best when singing in these keys, or maybe he just has a preference for the sound of them. However there are no songs in G# in *To Record Only Water For Ten Days*. This could be because of the (lack of) tuning in *Niandra Lades and Usually Just A T-Shirt*, resulting in some songs that are intentionally in A being read as G# by spotify. Frusciante also has a preference for minor with 29 songs in minor key and 11 in major key. *Niandra Lades and Usually Just A T-Shirt* has 17 songs in minor and 8 in major, and *To Record Only Water For Ten Days* has 12 songs in minor and 3 songs in major.
 
 
