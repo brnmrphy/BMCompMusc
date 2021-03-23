@@ -5,7 +5,7 @@ date: "2021"
 output: 
     flexdashboard::flex_dashboard:
         storyboard: true
-        theme: journal
+        theme: readable
         css: styles.css
 ---
 
@@ -175,6 +175,7 @@ The predictions sometimes slightly change (usually by one or two) when I rerun t
 froosh_knn %>% get_conf_mat() %>% 
   autoplot(type = "heatmap") 
 ```
+
 ***
 
 This heat map shows the performance of a kNN classifier. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted about a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
@@ -326,28 +327,30 @@ ALL3 <-
 ggplotly(froosh)
 ```
 
-### Histogram of vitality
+### Bar Chart of Vitality
 
 
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.width=8, fig.height=5}
 Valencebar <-
-ggplot(Both_Albums, aes(x=playlist_name, y=valence)) + 
-  geom_bar(stat="identity", width=.5, fill="#FF9933") + 
+ggplot(Both_Albums, aes(x=playlist_name, y=valence, fill=playlist_name)) + 
+  geom_bar(stat="identity", width=.5) + 
  labs(title="Ordered Bar Chart", 
-       subtitle="Valence Vs Album",
-       x="Album",
-       y="Valence") + 
-  theme(axis.text.x = element_text(angle=0, vjust=0.5))
+       subtitle="Valence Vs Album", x=NULL,
+       y="Valence",
+      fill="Album") + 
+  theme(axis.text.x = element_text(angle=0, vjust=0.5)) +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
 
 Energybar <-
-ggplot(Both_Albums, aes(x=playlist_name, y=energy)) + 
-  geom_bar(stat="identity", width=.5, fill="#FF3300") + 
+ggplot(Both_Albums, aes(x=playlist_name, y=energy, fill=playlist_name)) + 
+  geom_bar(stat="identity", width=.5) + 
   labs(title="Ordered Bar Chart", 
-       subtitle="Energy Vs Album",
-       x="Album",
-       y="Energy") + 
-  theme(axis.text.x = element_text(angle=0, vjust=0.5))
+       subtitle="Energy Vs Album",  x=NULL,
+       y="Energy",
+       fill="Album") + 
+  theme(axis.text.x = element_text(angle=0, vjust=0.5)) +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
 
 grid.arrange(Valencebar,Energybar, ncol=2)
 ```
@@ -355,3 +358,62 @@ grid.arrange(Valencebar,Energybar, ncol=2)
 ***
 
 On the left we have two bar charts, one measuring the valence and one measuring the energy on the two albums. As one would predict after listening to the albums, *To Record Only Water For Ten Days* beats *Niandra Lades and Usually Just A T-Shirt* on both accounts, especially in energy. What I find interesting, is that *Niandra Lades and Usually Just A T-Shirt* has 10 more songs than *To Record Only Water For Ten Days*, but still loses the fight. This shows how much more energetic and positive Spotify (and I can't help but agree) finds the latter album.
+
+### Histogram of Tempo Differences
+
+```{r, echo=FALSE, message=FALSE}
+mean_tempo1 <- Niandra_and_TShirt %>%
+  summarise(
+    mean_tempo = mean(tempo)
+  )
+mean_tempo2 <- To_Record_Water %>%
+  summarise(
+    mean_tempo = mean(tempo)
+  )
+
+Both_Albums %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      fill = playlist
+    )
+  ) +
+  scale_fill_manual(values = c("#B59377", "#3076D6")) +
+  geom_histogram(binwidth = 5) +
+  geom_vline(xintercept = 100.1241, linetype = "dashed", color = "#B59377", size = 3) +
+  geom_vline(xintercept = 109.5362	, linetype = "dashed", color = "#3076D6", size = 3) +
+  theme_light() +
+  labs(
+    x = "Tempo",
+    y = "Amount of songs",
+    title = "Comparing Tempo Usage Composers",
+    fill="Album"
+  ) +
+  theme_update(plot.title = element_text(hjust = 0.5))
+
+mean_tempo1
+
+mean_tempo2
+```
+
+### Comparing the Keys
+
+
+```{r}
+keyfroosh <- Both_Albums %>%
+ggplot(aes(x = factor(key_name), fill = mode_name)) +
+  geom_bar() +
+  xlab("Keys") +
+  ylab("Frequency")+
+  ggtitle("Frusciante's Keys") +
+  labs(fill="Major/Minor") +
+  scale_fill_discrete(guide=FALSE) +
+  facet_wrap(~playlist) +
+  theme_minimal() +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
+
+ggplotly(keyfroosh)
+```
+
+
+

@@ -5,13 +5,10 @@ date: "2021"
 output: 
     flexdashboard::flex_dashboard:
         storyboard: true
-        theme: journal
-            css: styles.css
-    orientation: rows
-    toc: true
-    toc_depth: 2
-    toc_float: tru
+        theme: readable
+        css: styles.css
 ---
+
 
 ```{r setup}
 library(tidyverse)
@@ -24,6 +21,9 @@ library(ggplot2)
 library(tidymodels)
 library(ggdendro)
 library(heatmaply)
+library(flexdashboard)
+library(png)
+library(knitr)
 ```
 
 ```{r}
@@ -62,113 +62,57 @@ get_pr <- function(fit) {
 Homework of this week {.storyboard}
 =========================================
 
-### Classifier
 
-```{r echo=FALSE}
-niandrawaters_features <-
-  Both_Albums %>%  # For your portfolio, change this to the name of your corpus.
-  add_audio_analysis() %>% 
-  mutate(
-    playlist = factor(playlist),
-    segments = map2(segments, key, compmus_c_transpose),
-    pitches =
-      map(
-        segments,
-        compmus_summarise, pitches,
-        method = "mean", norm = "euclidean"
-      ),
-    timbre =
-      map(
-        segments,
-        compmus_summarise, timbre,
-        method = "mean",
-      )
-  ) %>%
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) %>%
-  mutate_at(vars(pitches, timbre), map, bind_rows) %>%
-  unnest(cols = c(pitches, timbre))
+### **Classifiers**: using a **k-Nearest Neighbour**, **Decision Tree** and **Random Forest** classifier to predict which **song** belongs to the **album** it's from. 
 
-froosh_recipe <-
-  recipe(
-    playlist ~
-      danceability +
-      energy +
-      loudness +
-      speechiness +
-      acousticness +
-      instrumentalness +
-      liveness +
-      valence +
-      tempo +
-      duration +
-      C + `C#|Db` + D + `D#|Eb` +
-      E + `F` + `F#|Gb` + G +
-      `G#|Ab` + A + `A#|Bb` + B +
-      c01 + c02 + c03 + c04 + c05 + c06 +
-      c07 + c08 + c09 + c10 + c11 + c12,
-    data = niandrawaters_features,          # Use the same name as the previous block.
-  ) %>%
-  step_center(all_predictors()) %>%
-  step_scale(all_predictors())      # Converts to z-scores.
-  # step_range(all_predictors())    # Sets range to [0, 1].
+Here we have three classifying methodes; kNN, decision tree and random forest, attempting to distinguish the two albums by Frusciante I'm comparing. The most importent features are: 
 
-froosh_cv <- niandrawaters_features %>% vfold_cv(5)
+- Timbre component 1
+- Timbre component 2
+- Timbre component 12
+- loudness
+- energy
 
-knn_model <-
-  nearest_neighbor(neighbors = 1) %>%
-  set_mode("classification") %>% 
-  set_engine("kknn")
-froosh_knn <- 
-  workflow() %>% 
-  add_recipe(froosh_recipe) %>% 
-  add_model(knn_model) %>% 
-  fit_resamples(
-    froosh_cv, 
-    control = control_resamples(save_pred = TRUE)
-  )
+The predictions sometimes slightly change (usually by one or two) when I rerun the code, so it is possible the subtext differs from the corresponding heatmap. 
 
-froosh_knn %>% get_conf_mat() %>% autoplot(type = "heatmap")
-```
+#### K-Nearest Neighbours
 
 ***
 
-This heat map shows the performance of a classifier, attempting to distinguish the two albums by Frusciante I'm comparing. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
+This heat map shows the performance of a kNN classifier. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted about a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
 
-```{r include=FALSE}
-forest_model <-
-  rand_forest() %>%
-  set_mode("classification") %>% 
-  set_engine("ranger", importance = "impurity")
-froosh_forest <- 
-  workflow() %>% 
-  add_recipe(froosh_recipe) %>% 
-  add_model(forest_model) %>% 
-  fit_resamples(
-    froosh_cv, 
-    control = control_resamples(save_pred = TRUE)
-  )
+#### Decision Tree
 
-workflow() %>% 
-  add_recipe(froosh_recipe) %>% 
-  add_model(forest_model) %>% 
-  fit(niandrawaters_features) %>% 
-  pluck("fit", "fit", "fit") %>%
-  ranger::importance() %>% 
-  enframe() %>% 
-  mutate(name = fct_reorder(name, value)) %>% 
-  ggplot(aes(name, value)) + 
-  geom_col() + 
-  coord_flip() +
-  theme_minimal() +
-  labs(x = NULL, y = "Importance")
-```
+
+***
+
+This second classifier is done by the decision tree method. The predictions for *Niandra LaDes and Usually Just A T-Shirt* are apparently the same as the kNN classifier, but it performed better than the kNN when it predicted the songs *To Record Only Water For Ten Days*, only getting one song wrong.
+
+#### Random Forest
+
+***
+The last classifier I'm using is the random forest classifier. As you can see it perfomed the best out of the three, getting only one prediction wrong for both albums. 
+
 
 Introduction {.storyboard}
 =========================================
 
+-------------------------------------
+
 ### How About Some Revalidation Spotify? Comparing the **decent** and **recovery** of John Frusciante through music.
 
+
+
 John Frusciante is American musician best known as the guitarist of The Red Hot Chili Peppers (RHCP). Besides his work for the RHCP, he has had an accomplished and diverse solo career. In 1992 he left RHCP for the first time and released his debut solo album two years later, in November 1994. The album consists of two parts: *Niandra LaDes* and *Usually Just A T-Shirt*. *Niandra LaDes* was mostly recorded during the writing and recorded of RHCP album *Blood Surgar Sex Magic*, only "Running Away With You" was recorded after quitting the band. *Usually Just A T-Shirt* was recorded while the band was on tour in the months leading up to Frusciante's departure and it appears in the order it was recorded. It was during these months that his use of cocaine and heroin became more extreme. Frusciante said himself in an interview that he can hear his decline into hard drugs in the songs: "It's very sad because I hear, when I listen to it [the last two songs on the record], that it sounds like a person falling apart or it sounds like somebody about to kill themselves". It wasn't until January 1998 that Frusciante was admitted to rehab. He checked out and re-entered society about a month later. The same year Frusciante rejoined RHCP, released a new album with them and went on tour. During the tour he composed new material for his first solo record after rehabilitation, *To Record Only Water For Ten Days*. What I would like to research in this corpus, is what Spotify's API can tell us about the differences in his album before rehabilitation, *Niandra Lades and Usually Just A T-Shirt* (NLDAUJATS), and after rehabilitation, *To Record Only Water For Ten Days* (TROWFTD).
+
+#### The Album Covers
+
+```{r}
+
+knitr::include_graphics("niandraandwater.png")
+
+```
+
 
 Comparing both albums {.storyboard}
 =========================================
@@ -272,26 +216,66 @@ ALL3 <-
 ggplotly(froosh)
 ```
 
-### Histogram
+### Bar Chart of Vitality
 
-```{r}
-ggplot(Both_Albums, aes(x=playlist_name, y=valence)) + 
-  geom_bar(stat="identity", width=.5, fill="#FF9933") + 
+
+
+```{r, fig.width=8, fig.height=5}
+Valencebar <-
+ggplot(Both_Albums, aes(x=playlist_name, y=valence, fill=playlist_name)) + 
+  geom_bar(stat="identity", width=.5) + 
  labs(title="Ordered Bar Chart", 
-       subtitle="Valence Vs Album",
-       x="Album",
-       y="Valence") + 
-  theme(axis.text.x = element_text(angle=0, vjust=0.5))
+       subtitle="Valence Vs Album", x=NULL,
+       y="Valence",
+      fill="Album") + 
+  theme(axis.text.x = element_text(angle=0, vjust=0.5)) +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
 
-ggplot(Both_Albums, aes(x=playlist_name, y=energy)) + 
-  geom_bar(stat="identity", width=.5, fill="#FF3300") + 
+Energybar <-
+ggplot(Both_Albums, aes(x=playlist_name, y=energy, fill=playlist_name)) + 
+  geom_bar(stat="identity", width=.5) + 
   labs(title="Ordered Bar Chart", 
-       subtitle="Energy Vs Album",
-       x="Album",
-       y="Energy") + 
-  theme(axis.text.x = element_text(angle=0, vjust=0.5))
+       subtitle="Energy Vs Album",  x=NULL,
+       y="Energy",
+       fill="Album") + 
+  theme(axis.text.x = element_text(angle=0, vjust=0.5)) +
+  scale_fill_manual(values=c("#B59377", "#3076D6"))
+
+grid.arrange(Valencebar,Energybar, ncol=2)
 ```
 
 ***
 
 On the left we have two bar charts, one measuring the valence and one measuring the energy on the two albums. As one would predict after listening to the albums, *To Record Only Water For Ten Days* beats *Niandra Lades and Usually Just A T-Shirt* on both accounts, especially in energy. What I find interesting, is that *Niandra Lades and Usually Just A T-Shirt* has 10 more songs than *To Record Only Water For Ten Days*, but still loses the fight. This shows how much more energetic and positive Spotify (and I can't help but agree) finds the latter album.
+
+### Histogram of Tempo Differences
+
+```{r, echo=FALSE, message=FALSE}
+mean_tempo1 <- Niandra_and_TShirt %>%
+  summarise(
+    mean_tempo = mean(tempo)
+  )
+mean_tempo2 <- To_Record_Water %>%
+  summarise(
+    mean_tempo = mean(tempo)
+  )
+
+Both_Albums %>%
+  ggplot(                     # Set up the plot.
+    aes(
+      x = tempo,
+      fill = playlist
+    )
+  ) +
+  scale_fill_manual(values = c("#B59377", "#3076D6")) +
+  geom_histogram(binwidth = 5) +
+  geom_vline(xintercept = 100.1241, linetype = "dashed", color = "#B59377", size = 3) +
+  geom_vline(xintercept = 109.5362	, linetype = "dashed", color = "#3076D6", size = 3) +
+  theme_light() +
+  labs(
+    x = "Tempo",
+    y = "Amount of songs",
+    title = "Comparing Tempo Usage Composers"
+  ) +
+  theme_update(plot.title = element_text(hjust = 0.5))
+```
