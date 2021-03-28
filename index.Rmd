@@ -424,7 +424,6 @@ I have chosen the songs "Running Away Into You" from *NLDAUJATS* and "Going Insi
 
 - "Going Inside" has a mean valence and energy of 0.5840 and 0.81600 respectively, with a mean valence and energy of 0.4666 and 0.7543 respectively for *TROWFTD*. 
 
-#### The Songs
 
 <iframe src="https://open.spotify.com/playlist/14l87w1okIlWsa68eNqGka?si=zFY4qK0dTT29QEajSLL0yg" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
@@ -450,7 +449,7 @@ chromoniandraaverage %>%
       fill = value
     )
   ) +
-  ggtitle("John Frusciante - Running Away Into You") +
+  ggtitle("Running Away Into You") +
   geom_tile() +
   labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
   theme_minimal() +
@@ -474,7 +473,7 @@ chromawateraverage %>%
       fill = value
     )
   ) +
-  ggtitle("John Frusciante - Going Inside") +
+  ggtitle("Going Inside") +
   geom_tile() +
   labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
   theme_minimal() +
@@ -488,9 +487,12 @@ grid.arrange(plotone, plottwo
 ***
 
 First of all a track-level analysis with chromagrams. The chromagrams already show us some relevant differences between the tracks. 
+
 "Running Away With You" seems to have more distinction between notes than "Going Inside", but there are more clustered segments of two or three notes that are only a half step each away from each other: C#/Db and D, A, A#/Bb and B (around the 75s mark), and F#/Gb and G from 100s onward. "Going Inside" has less spaces with low magnitude, but there's more distinction in the notes of Gm, the key the song is in. 
+
 "Going Inside" clearly has more consonance than "Running Away Into You", which results in it sounding more pleasant and acceptable to the ear. The harshness and dissonance of "Running Away Into You" could be seen as a reflection of someone in an unstable period, e.g. a desent into hard drugs. "Going Inside" sounds much more structured and stable. The main reason for this is the drum machine being used in *TROWFTD*, but the harmonies and tones are also a lot more clear and bright than in *NLDAUJATS*. 
-These chromagrams visualize the lack of structure Frusciante's music had in his desent and the 
+
+These chromagrams visualize the lack of structure Frusciante's music had in his descent and the refound structure in his music made after revalidation. 
 
 ### Self-Similarity Matrix
 
@@ -699,4 +701,4 @@ Here's where things get very clear. The tempogram of "Running Away Into You" is 
 
 This however, is not a fair comparison. As steated earlier, "Going Inside" has a drum machine making the job a lot easier for the tempogram. This is why I have included a third tempogram for the song "Saturation" on *TROWFTD*, one of only two songs that doesn't make use of a drum machine. I chose this song not only for the lack of a constant tempo, but also for the similar playing style of alternating between strumming and picking chords.
 
-As you can see, *TROWFTD* remains triumphs in maintaining a (somewhat) stable tempo. The tempogram once again doubles and very occasionally quadruples the original bpm of 92.3, but coincidentally like "Running Away Into You" does something strange at the last part of the song. This time it resembles a DNA helix, caused by the overpowering synthesizer being played. 
+As you can see, *TROWFTD* remains triumphant in maintaining a (somewhat) stable tempo. The tempogram once again doubles and very occasionally quadruples the original bpm of 92.3, but coincidentally like "Running Away Into You" does something strange at the last part of the song. This time it resembles a DNA helix, caused by the overpowering synthesizer being played. 
