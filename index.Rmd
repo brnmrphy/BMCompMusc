@@ -24,6 +24,9 @@ library(heatmaply)
 library(flexdashboard)
 library(png)
 library(knitr)
+library(cowplot)
+library(magick)
+library(gridGraphics)
 ```
 
 ```{r}
@@ -59,11 +62,6 @@ get_pr <- function(fit) {
 }  
 ```
 
-Homework of this week {.storyboard}
-=========================================
-
-
-### **Classifiers**: using a **k-Nearest Neighbour**, **Decision Tree** and **Random Forest** classifier to predict which **song** belongs to the **album** it's from. 
 
 ```{r echo=FALSE}
 niandrawaters_features <-
@@ -92,21 +90,8 @@ niandrawaters_features <-
 froosh_recipe <-
   recipe(
     playlist ~
-      danceability +
       energy +
-      loudness +
-      speechiness +
-      acousticness +
-      instrumentalness +
-      liveness +
-      valence +
-      tempo +
-      duration +
-      C + `C#|Db` + D + `D#|Eb` +
-      E + `F` + `F#|Gb` + G +
-      `G#|Ab` + A + `A#|Bb` + B +
-      c01 + c02 + c03 + c04 + c05 + c06 +
-      c07 + c08 + c09 + c10 + c11 + c12,
+      valence,
     data = niandrawaters_features,          # Use the same name as the previous block.
   ) %>%
   step_center(all_predictors()) %>%
@@ -114,36 +99,6 @@ froosh_recipe <-
   # step_range(all_predictors())    # Sets range to [0, 1].
 
 froosh_cv <- niandrawaters_features %>% vfold_cv(5)
-```
-
-```{r class, include=TRUE, echo=FALSE, message=FALSE}
-knn_model <-
-  nearest_neighbor(neighbors = 1) %>%
-  set_mode("classification") %>% 
-  set_engine("kknn")
-froosh_knn <- 
-  workflow() %>% 
-  add_recipe(froosh_recipe) %>% 
-  add_model(knn_model) %>% 
-  fit_resamples(
-    froosh_cv, 
-    control = control_resamples(save_pred = TRUE)
-  )
-```
-
-```{r trees, include=TRUE, echo=FALSE, message=FALSE} 
-tree_model <-
-  decision_tree() %>%
-  set_mode("classification") %>% 
-  set_engine("C5.0")
-froosh_tree <- 
-  workflow() %>% 
-  add_recipe(froosh_recipe) %>% 
-  add_model(tree_model) %>% 
-  fit_resamples(
-    froosh_cv, 
-    control = control_resamples(save_pred = TRUE)
-  )
 ```
 
 ```{r forest, include=FALSE, echo=FALSE, message=FALSE} 
@@ -159,50 +114,26 @@ froosh_forest <-
     froosh_cv, 
     control = control_resamples(save_pred = TRUE)
   )
+
 ```
 
-Here we have three classifying methodes; kNN, decision tree and random forest, attempting to distinguish the two albums by Frusciante I'm comparing. The most importent features are: 
-
-- Timbre component 1
-- Timbre component 2
-- Timbre component 12
-- loudness
-- energy
-
-The predictions sometimes slightly change (usually by one or two) when I rerun the code, so it is possible the subtext differs from the corresponding heatmap. 
-
-#### K-Nearest Neighbours
-
-```{r KNN, echo=FALSE, message=FALSE}
-froosh_knn %>% get_conf_mat() %>% 
-  autoplot(type = "heatmap") 
+```{r, message=FALSE, include=FALSE}
+workflow() %>% 
+  add_recipe(froosh_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(niandrawaters_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance")
 ```
 
-***
 
-This heat map shows the performance of a kNN classifier. As you can see, Spotify did a near perfect job on predicting the songs for *Niandra LaDes and Usually Just A T-Shirt*, but wrongly predicted about a third of the songs for *To Record Only Water For Ten Days*. I'd love to be able to see which songs were wrongly predicted, anyone know where I can see that?
-
-#### Decision Tree
-
-
-```{r dtree, echo=FALSE, message=FALSE}
-froosh_tree %>% get_conf_mat() %>% 
-  autoplot(type = "heatmap") 
-```
-
-***
-
-This second classifier is done by the decision tree method. The predictions for *Niandra LaDes and Usually Just A T-Shirt* are apparently the same as the kNN classifier, but it performed better than the kNN when it predicted the songs *To Record Only Water For Ten Days*, only getting one song wrong.
-
-#### Random Forest
-
-```{r rforest, echo=FALSE, message=FALSE}
-froosh_forest %>% get_conf_mat() %>%
-  autoplot(type = "heatmap") 
-```
-
-***
-The last classifier I'm using is the random forest classifier. As you can see it perfomed the best out of the three, getting only one prediction wrong for both albums. 
 
 ```{r include=FALSE}
 workflow() %>% 
@@ -225,7 +156,7 @@ Introduction {.storyboard}
 
 ### How About Some Revalidation Spotify? Comparing the **decent** and **recovery** of John Frusciante through music.
 
-John Frusciante is American musician best known as the guitarist of The Red Hot Chili Peppers (RHCP). Besides his work for the RHCP, he has had an accomplished and diverse solo career. In 1992 he left RHCP for the first time and released his debut solo album two years later, in November 1994. The album consists of two parts: *Niandra LaDes* and *Usually Just A T-Shirt*. *Niandra LaDes* was mostly recorded during the writing and recorded of RHCP album *Blood Surgar Sex Magic*, only "Running Away With You" was recorded after quitting the band. *Usually Just A T-Shirt* was recorded while the band was on tour in the months leading up to Frusciante's departure and it appears in the order it was recorded. It was during these months that his use of cocaine and heroin became more extreme. Frusciante said himself in an interview that he can hear his decline into hard drugs in the songs: "It's very sad because I hear, when I listen to it [the last two songs on the record], that it sounds like a person falling apart or it sounds like somebody about to kill themselves". It wasn't until January 1998 that Frusciante was admitted to rehab. He checked out and re-entered society about a month later. The same year Frusciante rejoined RHCP, released a new album with them and went on tour. During the tour he composed new material for his first solo record after rehabilitation, *To Record Only Water For Ten Days*. What I would like to research in this corpus, is what Spotify's API can tell us about the differences in his album before rehabilitation, *Niandra Lades and Usually Just A T-Shirt* (NLDAUJATS), and after rehabilitation, *To Record Only Water For Ten Days* (TROWFTD).
+John Frusciante is American musician best known as the guitarist of The Red Hot Chili Peppers (RHCP). Besides his work for the RHCP, he has had an accomplished and diverse solo career. In 1992 he left RHCP for the first time and released his debut solo album two years later, in November 1994. The album consists of two parts: *Niandra LaDes* and *Usually Just A T-Shirt*. *Niandra LaDes* was mostly recorded during the writing and recorded of RHCP album *Blood Surgar Sex Magic*, only "Running Away With You" was recorded after quitting the band. *Usually Just A T-Shirt* was recorded while the band was on tour in the months leading up to Frusciante's departure and it appears in the order it was recorded. It was during these months that his use of cocaine and heroin became more extreme. Frusciante said himself in an interview that he can hear his decline into hard drugs in the songs: "It's very sad because I hear, when I listen to it [the last two songs on the record], that it sounds like a person falling apart or it sounds like somebody about to kill themselves". It wasn't until January 1998 that Frusciante was admitted to rehab. He checked out and re-entered society about a month later. The same year Frusciante rejoined RHCP, released a new album with them and went on tour. During the tour he composed new material for his first solo record after rehabilitation, *To Record Only Water For Ten Days*. What I would like to research in this corpus, is what Spotify's API can tell us about the differences in his album before rehabilitation, *Niandra Lades and Usually Just A T-Shirt* (NLDAUJATS), and after rehabilitation, *To Record Only Water For Ten Days* (TROWFTD). I will compare the two albums mostly by comparing the Spotify features: **speechiness** (spoken word detection), **valence** (musical positiveness), **energy** (a perceptual measure of intensity and activity), **loudness** (the overall loudness of a track in decibels) and **danceability** (danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity).
 
 #### The Album Covers
 
@@ -249,7 +180,7 @@ Comparing both albums {.storyboard}
     aes(
       x = valence,
       y = energy,
-      colour = mode,
+      colour = loudness,
       size = speechiness,
       label = track.name          # Labels will be interactively visible.
     )
@@ -279,9 +210,11 @@ Comparing both albums {.storyboard}
   labs(                            # Make the titles nice.
   )
 ggplotly(Niandra_Water)
-```
+```     
 
+***
 
+This scatter plot shows the energy vs valence of all songs from both albums. The size represents the speechiness (the detection of spoken words in a track) and the colour represents the loudness (overall loudness of a track in dB). I think this graph does a great job of showing the overall difference between the two albums. For example, the smooth line shows that the lowest energy level of *TROWFTD* seamlessly picks up from where *NLDAUJATS* left it and continues to raise the bar. Most of the songs on *NLDAUJATS* are also generally more clustered around the bottom left corner, meaning they are low on energy and valence, while most of the songs on *TROWFTD* are clustered around the top in the middle and on the right, showing that are way higher in energy levels and 'positivity'. Both the speech and loudness levels are also clearly higher on *TROWFTD*. The loudest song on *NLDAUJATS* ('Big Takeover') for example, is nearly four times quieter than the loudest song on *TROWFTD* ('Fallout'). Something I don't understand however, is that the song 'Skin Blues' has the highest speech levels on *NLDAUJATS*. 'Skin Blues' has no vocals on it or any speech as far as I can hear, so what does Spotify analyze that sounds to it like spoken words?
 
 ```{r}
 Niandra_and_TShirt <- get_playlist_audio_features(".", "0sCFlO6qvFmlLOrg1HcsfS")
@@ -402,10 +335,8 @@ Both_Albums %>%
   ) +
   theme_update(plot.title = element_text(hjust = 0.5))
 
-mean_tempo1
-
-mean_tempo2
 ```
+
 
 ### Comparing the Keys
 
@@ -444,6 +375,328 @@ kable(key_and_name, col.names = c('Key', 'Track', 'Album'))
 
 ***
 
-Here we have a histogram comparing the keys used in the two albums. It seems Frusciante had a preference for writing songs in A, B, D(major) and G#. B and G# are both close to A, by a whole note and a half note respectively. This could suggest that his vocal range fits best when singing in these keys, or maybe he just has a preference for the sound of them. However there are no songs in G# in *To Record Only Water For Ten Days*. This could be because of the (lack of) tuning in *Niandra Lades and Usually Just A T-Shirt*, resulting in some songs that are intentionally in A being read as G# by spotify. Frusciante also has a preference for minor with 29 songs in minor key and 11 in major key. *Niandra Lades and Usually Just A T-Shirt* has 17 songs in minor and 8 in major, and *To Record Only Water For Ten Days* has 12 songs in minor and 3 songs in major.
+Here we have a histogram comparing the keys used in the two albums. It seems Frusciante had a preference for writing songs in A, B, D(major) and G#. B and G# are both close to A, by a whole note and a half note respectively. This could suggest that his vocal range fits best when singing in these keys, or maybe he just has a preference for the sound of them. However there are no songs in G# in *TROWFTD*. This could be because of (sometimes what seems unintentional) instances of chromatic music in *NLDAUJATS*, resulting in some songs that might intentionally be in A, being read as G# by Spotify. Frusciante also has a preference for minor with 29 songs in minor key and 11 in major key. *NLDAUJATS* has 17 songs in minor and 8 in major, and *TROWFTD* has 12 songs in minor and 3 songs in major.
 
 
+### **Classifiers**: using a **k-Nearest Neighbour**, **Decision Tree** and **Random Forest** classifier to predict which **song** belongs to the **album** it's from. 
+
+```{r rforest}
+froosh_forest %>% get_conf_mat() %>%
+  autoplot(type = "heatmap") 
+```
+
+```{r, message=FALSE}
+
+frooshpredict <- froosh_forest %>% collect_predictions %>%
+  filter(.pred_class != playlist)
+
+head(frooshpredict)
+```
+
+***
+The last classifier I'm using is the random forest classifier. As you can see it perfomed the best out of the three, getting only one prediction wrong for both albums. 
+
+```{r include=FALSE}
+workflow() %>% 
+  add_recipe(froosh_recipe) %>% 
+  add_model(forest_model) %>% 
+  fit(niandrawaters_features) %>% 
+  pluck("fit", "fit", "fit") %>%
+  ranger::importance() %>% 
+  enframe() %>% 
+  mutate(name = fct_reorder(name, value)) %>% 
+  ggplot(aes(name, value)) + 
+  geom_col() + 
+  coord_flip() +
+  theme_minimal() +
+  labs(x = NULL, y = "Importance")
+```
+
+
+Comparing songs {.storyboard}
+=========================================
+
+### The Chosen (s)On(g)e's: **zooming** in on two songs, from both albums, with relatively average **valence** and **energy** levels
+
+I have chosen the songs "Running Away Into You" from *NLDAUJATS* and "Going Inside" from *TROWFTD* because I think they are good representations for the positiveness (valence) and energy of their given album and time period. Zooming in on these tracks will hopefully give new insights on the differences between the two radically different periods in which the songs were recorded.
+
+- "Running Away Into You" has a mean valence and energy of 0,2120 and 0,25400 respectively, with a mean valence and energy of 0,2414 and 0,30840 respectively for *NLDAUJATS*. 
+
+- "Going Inside" has a mean valence and energy of 0.5840 and 0.81600 respectively, with a mean valence and energy of 0.4666 and 0.7543 respectively for *TROWFTD*. 
+
+#### The Songs
+
+<iframe src="https://open.spotify.com/track/0BCnNOixX8zSyWNo7I7onO?si=mRenZgN-TSWGla5ENWSTLQ" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+### Chromograms
+
+
+```{r}
+chromoniandraaverage <-
+  get_tidy_audio_analysis("0BCnNOixX8zSyWNo7I7onO") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+plotone <-
+chromoniandraaverage %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%  
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  ggtitle("John Frusciante - Running Away Into You") +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+
+chromawateraverage <-
+  get_tidy_audio_analysis("7vxlM6ouhpJy5WMEZqU7vV") %>%
+  select(segments) %>%
+  unnest(segments) %>%
+  select(start, duration, pitches)
+
+plottwo <-
+chromawateraverage %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() %>% 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  ggtitle("John Frusciante - Going Inside") +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+
+grid.arrange(plotone, plottwo
+             )
+
+```
+
+***
+
+First of all a track-level analysis with chromagrams. The chromagrams already show us some relevant differences between the tracks. 
+"Running Away With You" seems to have more distinction between notes than "Going Inside", but there are more clustered segments of two or three notes that are only a half step each away from each other: C#/Db and D, A, A#/Bb and B (around the 75s mark), and F#/Gb and G from 100s onward. "Going Inside" has less spaces with low magnitude, but there's more distinction in the notes of Gm, the key the song is in. 
+"Going Inside" clearly has more consonance than "Running Away Into You", which results in it sounding more pleasant and acceptable to the ear. The harshness and dissonance of "Running Away Into You" could be seen as a reflection of someone in an unstable period, e.g. a desent into hard drugs. "Going Inside" sounds much more structured and stable. The main reason for this is the drum machine being used in *TROWFTD*, but the harmonies and tones are also a lot more clear and bright than in *NLDAUJATS*. 
+These chromagrams visualize the lack of structure Frusciante's music had in his desent and the 
+
+### Self-Similarity Matrix
+
+```{r}
+selfsimmatrixniandraAVERAGE <-
+  get_tidy_audio_analysis("0BCnNOixX8zSyWNo7I7onO") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  selfsimmatrixniandraAVERAGE %>%
+    compmus_self_similarity(pitches, "aitchison") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  selfsimmatrixniandraAVERAGE %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  ggtitle("John Frusciante - Running Away Into You") +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none",option = "Magnitude") +
+  theme_classic() +
+  labs(x = "", y = "")
+
+selfsimmatrixwaterAVERAGE <-
+  get_tidy_audio_analysis("7vxlM6ouhpJy5WMEZqU7vV") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  selfsimmatrixwaterAVERAGE %>%
+    compmus_self_similarity(pitches, "aitchison") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  selfsimmatrixwaterAVERAGE %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  ggtitle("John Frusciante - Going Inside") +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none",option = "Magnitude") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+
+
+```{r}
+selfsimmatrixniandraLOW <-
+  get_tidy_audio_analysis("0BCnNOixX8zSyWNo7I7onO") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  selfsimmatrixniandraLOW %>%
+    compmus_self_similarity(pitches, "aitchison") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  selfsimmatrixniandraLOW %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  ggtitle("John Frusciante - Been Insane") +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none",option = "Magnitude") +
+  theme_classic() +
+  labs(x = "", y = "")
+
+selfsimmatrixwaterLOW <-
+  get_tidy_audio_analysis("3dqy3IfD6ZsVHTETdpLjFq") %>%
+  compmus_align(bars, segments) %>%
+  select(bars) %>%
+  unnest(bars) %>%
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) %>%
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  selfsimmatrixwaterLOW %>%
+    compmus_self_similarity(pitches, "aitchison") %>%
+    mutate(d = d / max(d), type = "Chroma"),
+  selfsimmatrixwaterLOW %>%
+    compmus_self_similarity(timbre, "euclidean") %>%
+    mutate(d = d / max(d), type = "Timbre")
+) %>%
+  mutate() %>%
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  ggtitle("John Frusciante - Saturation") +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(guide = "none",option = "Magnitude") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+
+
+### Tempogram
+
+```{r, fig.height=6, fig.width=10}
+
+tempo11 <- ggdraw() + draw_image("RAIYtempogram.png")
+tempo22 <- ggdraw() + draw_image("Gitempogram.png")
+tempo33 <- ggdraw() + draw_image("SaturationTempogram.png")
+
+plot_grid(tempo11, tempo22, tempo33, nrow=2)
+
+```
+
+
+***
+
+Here's where things get very clear. The tempogram of "Running Away Into You" is all over the place. There's no clear bpm to find and in the last few seconds Spotify reads multiple tempo's at the same time, all what seems to be equally distanced apart. This is due to the delay feedback at the end of the track, being sped and slowed down. The tempo of "Going Inside" is self-measured by the tempogram at around the 200/400 bpm mark. The tempo Spotify measures is 104.1 bpm. The reason for this difference is the tempogram basing the bpm on energy, and therefor doubling and quadrupling the original bpm by including the 8th and 16th notes in it's measurement. Spotify bases the tempo on the average beat duration, smartly choosing the quarter notes of the 4/4 time signature the song is in.
+
+This however, is not a fair comparison. As steated earlier, "Going Inside" has a drum machine making the job a lot easier for the tempogram. This is why I have included a third tempogram for the song "Saturation" on *TROWFTD*, one of only two songs that doesn't make use of a drum machine. I chose this song not only for the lack of a constant tempo, but also for the similar playing style of alternating between strumming and picking chords.
+
+As you can see, *TROWFTD* remains triumphs in maintaining a (somewhat) stable tempo. The tempogram once again doubles and very occasionally quadruples the original bpm of 92.3, but coincidentally like "Running Away Into You" does something strange at the last part of the song. This time it resembles a DNA helix, caused by the overpowering synthesizer being played. 
