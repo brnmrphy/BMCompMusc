@@ -496,8 +496,8 @@ First of all a track-level analysis with chromagrams. The chromagrams already sh
 
 These chromagrams visualize the lack of structure Frusciante's music had in his descent and the refound structure in his music made after revalidation. 
 
-<iframe src="https://open.spotify.com/embed/track/0BCnNOixX8zSyWNo7I7onO?si=KZ8lAVydQWmRlZXMYk6trQ" width="200" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-<iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="200" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/track/0BCnNOixX8zSyWNo7I7onO?si=KZ8lAVydQWmRlZXMYk6trQ" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 
 ### Self-Similarity Matrix
@@ -709,8 +709,8 @@ This however, is not a fair comparison. As steated earlier, "Going Inside" has a
 
 As you can see, *TROWFTD* remains triumphant in maintaining a (somewhat) stable tempo. The tempogram once again doubles and very occasionally quadruples the original bpm of 92.3, but coincidentally like "Running Away Into You" does something strange at the last part of the song. This time it resembles a DNA helix, caused by the overpowering synthesizer being played. 
 
-<iframe src="https://open.spotify.com/embed/track/0BCnNOixX8zSyWNo7I7onO?si=KZ8lAVydQWmRlZXMYk6trQ" width="200" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-<iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="200" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-<iframe src="https://open.spotify.com/embed/track/3dqy3IfD6ZsVHTETdpLjFq?si=kt5WHJQbQSug47bpT50VLg" width="200" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/track/0BCnNOixX8zSyWNo7I7onO?si=KZ8lAVydQWmRlZXMYk6trQ" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/track/3dqy3IfD6ZsVHTETdpLjFq?si=kt5WHJQbQSug47bpT50VLg" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 
