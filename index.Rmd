@@ -425,7 +425,7 @@ I have chosen the songs "Running Away Into You" from *NLDAUJATS* and "Going Insi
 - "Going Inside" has a mean valence and energy of 0.5840 and 0.81600 respectively, with a mean valence and energy of 0.4666 and 0.7543 respectively for *TROWFTD*. 
 
 
-<iframe src="https://open.spotify.com/playlist/14l87w1okIlWsa68eNqGka?si=zFY4qK0dTT29QEajSLL0yg" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/playlist/14l87w1okIlWsa68eNqGka?si=zFY4qK0dTT29QEajSLL0yg" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 ### Chromograms
 
