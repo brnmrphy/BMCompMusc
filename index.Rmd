@@ -63,8 +63,8 @@ knitr::include_graphics("niandraandwater.png")
 
 #### Album clips
 
-<iframe src="https://open.spotify.com/embed/album/4wTLTb4VpQtTxmeyyFOFVj?si=8ojmkQguQdeaEsZm3fNRBw" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-<iframe src="https://open.spotify.com/embed/album/3a9g6ueh2eVIYGTfmSoKkb?si=wttcdyxJS_CS1IxLVkPyYg" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/album/4wTLTb4VpQtTxmeyyFOFVj?si=8ojmkQguQdeaEsZm3fNRBw" width="582" height="300" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/album/3a9g6ueh2eVIYGTfmSoKkb?si=wttcdyxJS_CS1IxLVkPyYg" width="582" height="300" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 Comparing both albums {.storyboard}
 =========================================
@@ -296,7 +296,7 @@ Because the difference between the albums is already very clear from the get-go,
 
 The classifier performed slightly worse, predicting three songs on each album wrong. "Big Takeover" and "Ramparts" make another appearance, and with even more confidence than before with a whopping 89.7% and 99.6% respectively. "Untitled #10" and "As Can Be" are quite surprising predictions if you were to listen to the songs. If you take a look back at the scatterplot, you can see that "As Can Be" has an energy level which is passable for *TROWFTD* and "Untitled #10" gets in through relatively high valence levels. "Saturation" and "The First Season" are both the only songs on *TROWFTD* other than "Ramparts" that have no drum machine, which get them in *NLDAUJATS* due to low energy and valence levels. 
 
-<iframe src="https://open.spotify.com/embed/playlist/0k2H0qA6ez1Ahurk671ZfS?si=3ULUnbZsRF2AiTZljXHcXw" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+<iframe src="https://open.spotify.com/embed/playlist/0k2H0qA6ez1Ahurk671ZfS?si=3ULUnbZsRF2AiTZljXHcXw" width="280" height="300" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 
 Comparing songs {.storyboard}
