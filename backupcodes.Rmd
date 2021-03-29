@@ -1,0 +1,54 @@
+---
+title: "random"
+author: "Brian Murphy"
+date: "3/10/2021"
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+library(plotly) # N.B. Requires the Cairo package
+library(spotifyr)
+library(compmus)
+library(dplyr)
+library(gridExtra)
+library(ggplot2)
+```
+
+
+
+
+```{r, cache=TRUE}
+temponiandra <- get_tidy_audio_analysis("0BCnNOixX8zSyWNo7I7onO")
+
+temponiandra %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  ggtitle("Running Away Into You") +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+tempowater <- get_tidy_audio_analysis("7vxlM6ouhpJy5WMEZqU7vV")
+
+tempowater %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  ggtitle("Going Inside") +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+tempowater2 <- get_tidy_audio_analysis("3dqy3IfD6ZsVHTETdpLjFq")
+
+tempowater2 %>%
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) %>%
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  ggtitle("Saturation") +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
