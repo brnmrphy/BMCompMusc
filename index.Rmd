@@ -280,7 +280,7 @@ knitr::include_graphics("classifierEV.png")
 | Saturation       | NLDAUJATS  | TROWFTD   | 50.9%      |
 | The First Season | NLDAUJATS  | TROWFTD   | 31.2%      |
 
-```{r classiimages2, echo = F, out.width = '70%', fig.align='center'}
+```{r classiimages2, echo = F, out.width = '100%', fig.align='center'}
 knitr::include_graphics("importantfeaturesALL.png")
 knitr::include_graphics("importantfeaturesEV.png")
 ```
