@@ -69,7 +69,7 @@ knitr::include_graphics("niandraandwater.png")
 Comparing both albums {.storyboard}
 =========================================
 
-### Scatterplot
+### The Two Albums In A **Scatterplot**: where do we point to next
 
 ```{r scatter}
   
@@ -124,7 +124,7 @@ Both the speech and loudness levels are also clearly higher on *TROWFTD*. The lo
 Something I don't understand however, is that the song 'Skin Blues' has the highest speech levels on *NLDAUJATS*. 'Skin Blues' has no vocals on it or any speech as far as I can hear, so what does Spotify analyze that sounds to it like spoken words?
 
 
-### Bar Chart of Vitality
+### Bar Chart of **Vitality**: can comparing valence and energy levels reveal some insights?
 
 
 
@@ -165,7 +165,7 @@ On the left we have two bar charts, one measuring the valence and one measuring 
 
 What I find interesting, is that *NLDAUJATS* has 10 more songs than *TROWFTD*, but still loses the fight. This shows how much more energetic and positive Spotify (and I can't help but agree) finds the latter.
 
-### Histogram of Tempo Differences
+### Histogram of **Tempo Differences**: "were you rushing or were you dragging"? 
 
 ```{r tempohistogram, echo=FALSE, message=FALSE}
 mean_tempo1 <- Niandra_and_TShirt %>%
@@ -211,7 +211,7 @@ the two albums. *TROWFTD's* tempi is clustered between 80-120bpm, with three out
 In terms of tempo, *TROWFTD* is contained with a couple of exceptions. *NLDAUJATS*, on the other hand, is more sporadic and let loose, possibly reflecting the let loose period Frusciante was in while recording the album.
 
 
-### Comparing the Keys
+### Comparing the **Keys**: are you feeling major or minor?
 
 
 ```{r keybars}
@@ -253,7 +253,7 @@ However, there are no songs in G# in *TROWFTD*. This could be because of (someti
 Frusciante also has a preference for minor with 29 songs in minor key and 11 in major key. *NLDAUJATS* has 17 songs in minor and 8 in major, and *TROWFTD* has 12 songs in minor and 3 songs in major.
 
 
-### Time for diagnosis: how well will Dr. Random-Forest perform?
+### Time for Diagnosis: how well will Dr. Random-Forest perform?
 
 
 ```{r classiimages, echo = F, out.width = '100%', fig.align='center'}
@@ -315,7 +315,7 @@ I have chosen the songs "Running Away Into You" from *NLDAUJATS* and "Going Insi
 <iframe src="https://open.spotify.com/embed/track/0BCnNOixX8zSyWNo7I7onO?si=KZ8lAVydQWmRlZXMYk6trQ" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 <iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="582" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
-### Chromograms
+### Round One, **Chromograms**: time for your pitch!
 
 
 ```{r chromagrams}
@@ -386,7 +386,7 @@ These chromagrams visualize the lack of structure Frusciante's music had in his 
 <iframe src="https://open.spotify.com/embed/track/7vxlM6ouhpJy5WMEZqU7vV?si=EbSBLnhqTICuwYADs7r2Ww" width="280" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 
-### Tempogram
+### Round Two, **Tempogram**: can you keep up the speed?
 
 
 ```{r tempoimages, echo = F, out.width = '70%', fig.align='center'}
@@ -408,7 +408,7 @@ As you can see, *TROWFTD* remains triumphant in maintaining a (somewhat) stable 
 <iframe src="https://open.spotify.com/embed/track/3dqy3IfD6ZsVHTETdpLjFq?si=kt5WHJQbQSug47bpT50VLg" width="280" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
 
 
-### Self-Similarity Matrix
+### Round Three, **Self-Similarity Matrix**: take a look in the mirror
 
 ```{r ssmimages, echo = F, out.width = '70%', fig.align='center'}
 knitr::include_graphics("SSMRAIY.png")
